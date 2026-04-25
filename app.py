@@ -1563,20 +1563,20 @@ def admin_episodes(series_id):
             if not video_url:
                 flash("กรุณากรอกลิงก์วิดีโอแบบ mp4", "error")
                 return redirect(url_for("admin_episodes", series_id=series_id))
+
             source_type = "direct"
 
         elif mode == "gdrive":
             drive_text = request.form.get("drive_link", "").strip()
             drive_id = extract_drive_id(drive_text)
+
             if not drive_id:
                 flash("ไม่สามารถดึง Drive ID จากลิงก์ได้ กรุณาตรวจสอบอีกครั้ง", "error")
                 return redirect(url_for("admin_episodes", series_id=series_id))
 
-            try:
-                file_real = download_drive_file(drive_id, series_id)
-            except Exception as e:
-                flash(str(e), "error")
-                return redirect(url_for("admin_episodes", series_id=series_id))
+            source_type = "gdrive"
+            video_url = f"https://drive.google.com/file/d/{drive_id}/preview"
+            file_path = None
 
                 rel_path = video_storage_path(file_real)
             file_path = rel_path
