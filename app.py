@@ -955,7 +955,7 @@ def stream_episode(episode_id):
             abort(404)
 
     if video_url:
-        return stream_remote_video(video_url)
+        return redirect(video_url, code=302)
 
     abort(404)
 
