@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -6,7 +5,11 @@
   <title>{% block title %}เว็บดูวิดีโอแบบแยกเรื่อง{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- ✅ Cloudflare Turnstile (ต้องมี!) -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
+
 <body>
   <header class="navbar">
     <button type="button" class="menu-toggle" id="menu-toggle" aria-label="เปิดเมนู">
@@ -58,18 +61,17 @@
     </nav>
   </aside>
 
-<form class="search-form" action="{{ url_for('search') }}" method="get">
-  <input
-    type="text"
-    name="q"
-    class="search-input"
-    placeholder="ค้นหาเรื่อง เช่น มหาเวทย์ผนึกมาร S2"
-    value="{{ request.args.get('q','') if request.endpoint == 'search' else '' }}"
-    required
-  />
-  <button type="submit" class="btn search-btn">ค้นหา</button>
-</form>
-
+  <form class="search-form" action="{{ url_for('search') }}" method="get">
+    <input
+      type="text"
+      name="q"
+      class="search-input"
+      placeholder="ค้นหาเรื่อง เช่น มหาเวทย์ผนึกมาร S2"
+      value="{{ request.args.get('q','') if request.endpoint == 'search' else '' }}"
+      required
+    />
+    <button type="submit" class="btn search-btn">ค้นหา</button>
+  </form>
 
   <main class="container">
     {% if request.endpoint != 'index' %}
@@ -133,10 +135,6 @@
       }
     });
   </script>
-
-  {% if TURNSTILE_ENABLED %}
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  {% endif %}
 
 </body>
 </html>
