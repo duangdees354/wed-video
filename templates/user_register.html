@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}สมัครบัญชี{% endblock %}
+
+{% block content %}
+<h1>สมัครบัญชี</h1>
+<form method="post" class="form">
+  <label for="username">ชื่อผู้ใช้</label>
+  <input type="text" id="username" name="username" required />
+
+  <label for="password">รหัสผ่าน</label>
+  <input type="password" id="password" name="password" required />
+
+  <label for="password_confirm">ยืนยันรหัสผ่าน</label>
+  <input type="password" id="password_confirm" name="password_confirm" required />
+
+  {% if TURNSTILE_ENABLED %}
+    <div class="cf-turnstile" style="margin-top:12px;margin-bottom:12px;"
+         data-sitekey="{{ TURNSTILE_SITE_KEY }}"
+         data-theme="dark"
+         data-language="th">
+    </div>
+  {% endif %}
+
+  <button type="submit" class="btn primary">สมัครสมาชิก</button>
+</form>
+  <p class="auth-switch">
+    มีบัญชีแล้ว? <a href="{{ url_for('user_login') }}">เข้าสู่ระบบ</a>
+  </p>
+
+{% endblock %}

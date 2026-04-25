@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}สำรองและคืนค่าข้อมูล{% endblock %}
+
+{% block content %}
+<h1>สำรองและคืนค่าข้อมูล</h1>
+
+<section class="backup-section">
+  <h2>ดาวน์โหลดค่าปัจจุบัน (สำรองข้อมูล)</h2>
+  <p class="hint">
+    สามารถเลือกดาวน์โหลดไฟล์สำรองได้ตามหมวดหมู่ด้านล่างนี้ แต่ละไฟล์จะเป็น <code>.json</code> แยกตามประเภทข้อมูล<br>
+    แนะนำให้ดาวน์โหลดเก็บไว้ทั้ง 3 แบบเป็นระยะ ๆ เพื่อความปลอดภัยของข้อมูล
+  </p>
+
+  <div class="backup-group">
+    <h3>1) ข้อมูลวิดีโอ (เรื่อง + ตอน)</h3>
+    <p class="hint">
+      รวมข้อมูลรายชื่อเรื่อง, ตอน, คำอธิบาย, ประเภทวิดีโอ, ลิงก์/ไอดีไฟล์ และข้อมูลวิดีโอที่ใช้เล่นทั้งหมด
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_videos') }}">ดาวน์โหลดข้อมูลวิดีโอ (.json)</a>
+  </div>
+
+  <div class="backup-group">
+    <h3>2) ข้อมูลสมาชิกและประวัติการดู</h3>
+    <p class="hint">
+      รวมข้อมูลบัญชีผู้ใช้ที่สมัครทั้งหมด, รหัสผ่าน (ตามที่บันทึกไว้ในระบบ), key ของผู้ใช้ และประวัติการดูของแต่ละคน
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_users') }}">ดาวน์โหลดข้อมูลสมาชิก (.json)</a>
+  </div>
+
+  <div class="backup-group">
+    <h3>3) ข้อมูลอื่น ๆ</h3>
+    <p class="hint">
+      สำหรับข้อมูลอื่น ๆ หรือโครงสร้างเวอร์ชันระบบ (ปัจจุบันยังไม่มีข้อมูลสำรองเพิ่มเติม แต่เตรียมไว้ใช้ในอนาคต)
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_other') }}">ดาวน์โหลดข้อมูลอื่น ๆ (.json)</a>
+  </div>
+</section>
+
+<section class="restore-section">
+  <h2>คืนค่าจากไฟล์สำรอง</h2>
+  <p class="hint">
+    เลือกไฟล์สำรอง <code>.json</code> ที่เคยดาวน์โหลดจากระบบนี้ แล้วกด "คืนค่าจากไฟล์"<br>
+    ระบบจะตรวจสอบอัตโนมัติว่าเป็นไฟล์ประเภทใด (วิดีโอ / สมาชิก / อื่น ๆ) และคืนค่าเฉพาะในหมวดหมู่นั้นเท่านั้น
+  </p>
+
+  <form method="post" class="form" enctype="multipart/form-data">
+    <label for="backup_file">เลือกไฟล์สำรอง (.json)</label>
+    <input type="file" id="backup_file" name="backup_file" accept="application/json" required />
+
+    <fieldset class="restore-mode">
+      <legend>โหมดการคืนค่า</legend>
+      <label>
+        <input type="radio" name="restore_mode" value="replace" checked>
+        ลบข้อมูลเดิมในหมวดนั้นทั้งหมด แล้วใช้ข้อมูลจากไฟล์แทน
+      </label>
+      <label>
+        <input type="radio" name="restore_mode" value="merge">
+        รวม/อัปเดตข้อมูลจากไฟล์ โดยไม่ลบข้อมูลเดิม (ถ้ามี id ซ้ำ ระบบจะอัปเดตข้อมูลเดิมให้)
+      </label>
+    </fieldset>
+
+    <button type="submit" class="btn danger">คืนค่าจากไฟล์</button>
+  </form>
+</section>
+{% endblock %}

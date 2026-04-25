@@ -1,0 +1,39 @@
+
+{% extends "base.html" %}
+{% block title %}หน้าหลัก - รายการเรื่องทั้งหมด{% endblock %}
+
+{% block content %}
+<h1>รายการเรื่องทั้งหมด</h1>
+
+{% if series_list %}
+  <div class="grid">
+    {% for s in series_list %}
+      <div class="card">
+        <a href="{{ url_for('series_detail', series_id=s['id']) }}">
+          {% if s['thumbnail_url'] %}
+            {% set thumb = s['thumbnail_url'] %}
+            {% if thumb.startswith('http') %}
+              <img src="{{ thumb }}" alt="{{ s['title'] }}" class="thumb" />
+            {% else %}
+              <img src="{{ media_url(thumb) }}" alt="{{ s['title'] }}" class="thumb" />
+            {% endif %}
+          {% else %}
+            <div class="thumb placeholder">ไม่มีรูปปก</div>
+          {% endif %}
+        </a>
+        <div class="card-body">
+          <h2 class="card-title">{{ s['title'] }}</h2>
+          {% if s['description'] %}
+            <p class="card-text">
+              {{ s['description'][:90] }}{% if s['description']|length > 90 %}...{% endif %}
+            </p>
+          {% endif %}
+          <a class="btn" href="{{ url_for('series_detail', series_id=s['id']) }}">ดูตอนของเรื่องนี้</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>ยังไม่มีเรื่องในระบบ</p>
+{% endif %}
+{% endblock %}
