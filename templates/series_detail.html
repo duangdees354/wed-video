@@ -1,0 +1,67 @@
+
+{% extends "base.html" %}
+{% block title %}{{ series['title'] }} - รายการตอน{% endblock %}
+
+{% block content %}
+<div class="series-header">
+  <div class="series-thumb-wrapper">
+    {% if series['thumbnail_url'] %}
+      {% set thumb = series['thumbnail_url'] %}
+      {% if thumb.startswith('http') %}
+        <img src="{{ thumb }}" alt="{{ series['title'] }}" class="series-thumb" />
+      {% else %}
+        <img src="{{ media_url(thumb) }}" alt="{{ series['title'] }}" class="series-thumb" />
+      {% endif %}
+    {% else %}
+      <div class="series-thumb placeholder">ไม่มีรูปปก</div>
+    {% endif %}
+  </div>
+  <div class="series-info">
+    <h1>{{ series['title'] }}</h1>
+    {% if series['description'] %}
+      <p>{{ series['description'] }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<h2>ตอนทั้งหมดของเรื่องนี้</h2>
+
+{% if episodes %}
+  <ul class="episode-list">
+    {% for ep in episodes %}
+      <li class="episode-item">
+        <div class="episode-thumb-wrapper">
+          {% if ep['thumbnail_url'] %}
+            {% set ethumb = ep['thumbnail_url'] %}
+            {% if ethumb.startswith('http') %}
+              <img src="{{ ethumb }}" alt="{{ ep['title'] }}" class="episode-thumb" />
+            {% else %}
+              <img src="{{ media_url(ethumb) }}" alt="{{ ep['title'] }}" class="episode-thumb" />
+            {% endif %}
+          {% else %}
+            <div class="episode-thumb placeholder-small">ไม่มีปกตอน</div>
+          {% endif %}
+        </div>
+        <div class="episode-main">
+          <div class="episode-title">
+            {% if ep['episode_number'] %}
+              ตอนที่ {{ ep['episode_number'] }}:
+            {% endif %}
+            {{ ep['title'] }}
+          </div>
+          {% if ep['description'] %}
+            <div class="episode-desc">
+              {{ ep['description'][:100] }}{% if ep['description']|length > 100 %}...{% endif %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="episode-actions">
+          <a class="btn" href="{{ url_for('watch_episode', series_id=series['id'], episode_id=ep['id']) }}">ดูตอนนี้</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>ยังไม่มีตอนในเรื่องนี้</p>
+{% endif %}
+{% endblock %}
