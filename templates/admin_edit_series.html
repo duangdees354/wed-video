@@ -1,0 +1,54 @@
+
+{% extends "base.html" %}
+{% block title %}แก้ไขเรื่อง - {{ series['title'] }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{{ url_for('admin_series') }}">จัดการเรื่อง</a> /
+  <span>แก้ไขเรื่อง: {{ series['title'] }}</span>
+</div>
+
+<h1>แก้ไขเรื่อง</h1>
+
+<form method="post" class="form" enctype="multipart/form-data">
+  <label for="title">ชื่อเรื่อง *</label>
+  <input type="text" id="title" name="title" value="{{ series['title'] }}" required />
+
+  <label for="description">คำอธิบาย</label>
+  <textarea id="description" name="description" rows="3">{{ series['description'] or '' }}</textarea>
+
+  <label>ปกเดิม (ถ้ามี)</label>
+  <div style="margin-bottom:0.5rem;">
+    {% if series['thumbnail_url'] %}
+      {% set thumb = series['thumbnail_url'] %}
+      {% if thumb.startswith('http') %}
+        <img src="{{ thumb }}" alt="{{ series['title'] }}" class="series-thumb" style="max-width:160px;" />
+      {% else %}
+        <img src="{{ media_url(thumb) }}" alt="{{ series['title'] }}" class="series-thumb" style="max-width:160px;" />
+      {% endif %}
+      <div class="hint">path ปกตอนนี้: {{ series['thumbnail_url'] }}</div>
+    {% else %}
+      <div class="series-thumb placeholder">ยังไม่มีรูปปก</div>
+    {% endif %}
+  </div>
+
+  <label for="thumbnail_url">เปลี่ยนเป็นลิงก์รูปปก (ไม่บังคับ)</label>
+  <input type="url" id="thumbnail_url" name="thumbnail_url" />
+
+  <label for="cover_file">หรืออัปโหลดรูปปกใหม่จากมือถือ</label>
+  <input type="file" id="cover_file" name="cover_file" accept="image/*" />
+
+  <p class="hint">
+    ถ้าอัปโหลดรูปใหม่ ระบบจะลบไฟล์ปกเดิมที่อยู่ใน static ให้อัตโนมัติ
+  </p>
+
+  <label for="episode_label">คำเรียกตอนในหน้าเรื่อง</label>
+  <select id="episode_label" name="episode_label" style="padding:0.5rem 0.75rem;border-radius:6px;background:#1a1f2e;color:#fff;border:1px solid #2d3550;width:100%;">
+    <option value="episodes" {% if series['episode_label'] == 'episodes' or not series['episode_label'] %}selected{% endif %}>ตอนทั้งหมดของเรื่องนี้</option>
+    <option value="seasons"  {% if series['episode_label'] == 'seasons'  %}selected{% endif %}>ซีซั่นทั้งหมดของเรื่องนี้</option>
+    <option value="both"     {% if series['episode_label'] == 'both'     %}selected{% endif %}>ตอนและซีซั่นทั้งหมดของเรื่องนี้</option>
+  </select>
+
+  <button type="submit" class="btn primary">บันทึกการเปลี่ยนแปลง</button>
+</form>
+{% endblock %}
