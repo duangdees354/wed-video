@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}ประวัติการดู: {{ user['username'] }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1rem;">
+  <a href="{{ url_for('admin_user_detail', user_id=user['id']) }}" class="btn">&larr; กลับหน้าจัดการผู้ใช้</a>
+</div>
+
+<h1>📺 ประวัติการดูทั้งหมด</h1>
+<p style="margin-bottom:1.25rem;color:#aaa;">
+  ผู้ใช้: <strong style="color:#fff;">{{ user['username'] }}</strong>
+  &nbsp;|&nbsp; ID: {{ user['id'] }}
+</p>
+
+{% if history and history|length > 0 %}
+  <div style="margin-bottom:0.75rem;">
+    <form method="post" onsubmit="return confirm('ยืนยันการลบประวัติการดูทั้งหมดของผู้ใช้นี้?');">
+      <input type="hidden" name="action" value="clear_history_all" />
+      <button type="submit" class="btn danger">ลบประวัติการดูทั้งหมดของผู้ใช้นี้</button>
+    </form>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>วันที่ / เวลา</th>
+        <th>เรื่อง</th>
+        <th>ตอนที่</th>
+        <th>ชื่อตอน</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in history %}
+      <tr>
+        <td style="white-space:nowrap;">{{ h['watched_at']|thdt }}</td>
+        <td>{{ h['series_title'] }}</td>
+        <td style="text-align:center;">{{ h['episode_number'] if h['episode_number'] else '-' }}</td>
+        <td>{{ h['episode_title'] }}</td>
+        <td style="white-space:nowrap;">
+          <form method="post" style="display:inline;" onsubmit="return confirm('ลบประวัติการดูตอนนี้?');">
+            <input type="hidden" name="action" value="delete_history_item" />
+            <input type="hidden" name="history_id" value="{{ h['id'] }}" />
+            <button type="submit" class="btn small">ลบตอนนี้</button>
+          </form>
+          <form method="post" style="display:inline;margin-left:0.25rem;" onsubmit="return confirm('ลบประวัติการดูทั้งหมดของเรื่องนี้สำหรับผู้ใช้นี้?');">
+            <input type="hidden" name="action" value="delete_history_series" />
+            <input type="hidden" name="series_id" value="{{ h['series_id'] }}" />
+            <button type="submit" class="btn small">ลบทั้งเรื่องนี้</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p style="margin-top:0.75rem;color:#888;font-size:0.9rem;">
+    รวมทั้งหมด {{ history|length }} รายการ
+  </p>
+{% else %}
+  <p style="color:#aaa;">ยังไม่มีประวัติการดูของผู้ใช้นี้</p>
+{% endif %}
+{% endblock %}
