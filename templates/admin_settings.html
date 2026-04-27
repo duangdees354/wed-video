@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}ตั้งค่าทั่วไป{% endblock %}
+
+{% block content %}
+<h1>ตั้งค่าทั่วไป</h1>
+
+<form method="post" class="form">
+  <input type="hidden" name="action" value="save_settings" />
+
+  <!-- ═══ SESSION ═══ -->
+  <section class="settings-card">
+    <h2 class="settings-card-title">⏱ ระยะเวลา Session</h2>
+
+    <div class="settings-row">
+      <div style="flex:1;">
+        <label style="display:block;margin-bottom:0.4rem;font-weight:600;">ผู้ใช้ทั่วไป</label>
+        <p style="color:#aaa;font-size:0.88rem;margin-bottom:0.6rem;">
+          ถูกเตะออกอัตโนมัติหลังจากไม่มีการล็อกอินใหม่เกินระยะเวลาที่กำหนด (ค่าเริ่มต้น: 30 วัน)
+        </p>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+          <input type="number" name="user_timeout_number"
+                 value="{{ settings.user_timeout_number }}" min="1"
+                 style="width:110px;" required />
+          <select name="user_timeout_unit" class="settings-select">
+            <option value="minutes" {% if settings.user_timeout_unit == 'minutes' %}selected{% endif %}>นาที</option>
+            <option value="hours"   {% if settings.user_timeout_unit == 'hours'   %}selected{% endif %}>ชั่วโมง</option>
+            <option value="days"    {% if settings.user_timeout_unit == 'days'    %}selected{% endif %}>วัน</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="flex:1;">
+        <label style="display:block;margin-bottom:0.4rem;font-weight:600;">แอดมิน</label>
+        <p style="color:#aaa;font-size:0.88rem;margin-bottom:0.6rem;">
+          แอดมินถูกเตะออกหลังล็อกอินเกินระยะเวลาที่กำหนด (ค่าเริ่มต้น: 8 ชั่วโมง)
+        </p>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+          <input type="number" name="admin_timeout_number"
+                 value="{{ settings.admin_timeout_number }}" min="1"
+                 style="width:110px;" required />
+          <select name="admin_timeout_unit" class="settings-select">
+            <option value="minutes" {% if settings.admin_timeout_unit == 'minutes' %}selected{% endif %}>นาที</option>
+            <option value="hours"   {% if settings.admin_timeout_unit == 'hours'   %}selected{% endif %}>ชั่วโมง</option>
+            <option value="days"    {% if settings.admin_timeout_unit == 'days'    %}selected{% endif %}>วัน</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ YOUTUBE DOWNLOAD ═══ -->
+  <section class="settings-card" id="yt-cookies-section">
+    <h2 class="settings-card-title">🎬 การดาวน์โหลด YouTube (โหมด A)</h2>
+    <p style="color:#aaa;font-size:0.88rem;margin-bottom:1.25rem;">
+      กำหนดค่าเริ่มต้นของระบบสำหรับการดาวน์โหลดคลิป YouTube ในโหมด A
+      (สามารถปรับเฉพาะตอนได้เมื่อเพิ่ม/แก้ไขตอน)
+    </p>
+
+    <!-- Sub: โหมดดาวน์โหลด -->
+    <div class="settings-sub-card">
+      <h3 class="settings-sub-title">🔧 โหมดดาวน์โหลด</h3>
+      <div class="yt-mode-group">
+        <label class="yt-mode-opt">
+          <input type="radio" name="yt_download_mode" value="none"
+                 {% if settings.yt_download_mode == 'none' %}checked{% endif %} />
+          <span>ไม่ใช้อะไรเลย <small style="color:#777;">(ดาวน์โหลดปกติ)</small></span>
+        </label>
+        <label class="yt-mode-opt">
+          <input type="radio" name="yt_download_mode" value="spoof"
+                 {% if settings.yt_download_mode == 'spoof' %}checked{% endif %} />
+          <span>ใช้การปลอมตัว <small style="color:#777;">(Spoof User-Agent เป็น Android Chrome)</small></span>
+        </label>
+        <label class="yt-mode-opt">
+          <input type="radio" name="yt_download_mode" value="cookies"
+                 {% if settings.yt_download_mode == 'cookies' %}checked{% endif %} />
+          <span>ใช้ Cookies <small style="color:#777;">(ต้องตั้งค่า cookies ด้านล่างก่อน)</small></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Sub: แหล่ง Cookies -->
+    <div class="settings-sub-card" style="margin-top:1.25rem;">
+      <h3 class="settings-sub-title">🍪 Cookies สำหรับ YouTube</h3>
+      <p style="color:#aaa;font-size:0.85rem;margin-bottom:0.85rem;">
+        ระบบตรวจสอบ cookies ตามลำดับอัตโนมัติ:<br>
+        <span style="color:#ccc;">1️⃣ Service Variable (<code>YT_COOKIES_CONTENT</code> หรือ <code>YT_COOKIES_PATH</code>)
+        → 2️⃣ ไฟล์ <code>yt_cookies.txt</code> ใน DATA_DIR
+        → 3️⃣ ค่าที่บันทึกในเว็บไซต์นี้</span>
+      </p>
+
+      <div style="margin-bottom:1rem;padding:0.65rem 1rem;border-radius:7px;background:#0d1220;border:1px solid #2a3450;">
+        <span style="font-size:0.88rem;color:#aaa;">แหล่ง cookies ที่พบในขณะนี้: </span>
+        {% if settings.cookies_source_now == 'env' %}
+          <span style="color:#4caf50;font-weight:600;">🟢 Service Variable</span>
+        {% elif settings.cookies_source_now == 'file' %}
+          <span style="color:#2196f3;font-weight:600;">🔵 ไฟล์ yt_cookies.txt</span>
+        {% elif settings.cookies_source_now == 'db' %}
+          <span style="color:#ff9800;font-weight:600;">🟠 ค่าในเว็บไซต์</span>
+        {% else %}
+          <span style="color:#f44336;font-weight:600;">🔴 ไม่พบ cookies</span>
+        {% endif %}
+      </div>
+
+      <label style="display:block;font-weight:600;margin-bottom:0.35rem;">วาง Cookies (Netscape format)</label>
+      <p style="color:#888;font-size:0.82rem;margin-bottom:0.5rem;">
+        Export cookies จาก browser ด้วย extension เช่น <em>Get cookies.txt LOCALLY</em>
+        แล้วนำมาวางที่นี่ (ใช้เมื่อไม่ได้ตั้ง Service Variable หรือวางไฟล์ไว้บนเซิร์ฟเวอร์)
+      </p>
+      <textarea name="yt_cookies_text" rows="8"
+                style="width:100%;font-family:monospace;font-size:0.81rem;background:#0a0e1a;color:#ccc;border:1px solid #2d3550;border-radius:6px;padding:0.65rem;box-sizing:border-box;resize:vertical;"
+                placeholder="# Netscape HTTP Cookie File&#10;# วาง cookies ที่ export มาจาก browser ตรงนี้">{{ settings.yt_cookies_text }}</textarea>
+
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem;">
+        <button type="submit" name="action" value="save_settings" class="btn primary">💾 บันทึกการตั้งค่า</button>
+        <button type="submit" name="action" value="check_cookies" class="btn"
+                style="background:#1a2a1a;border:1px solid #3a6b3a;color:#7ec97e;">
+          🔍 ตรวจสอบ Cookies
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div>
+    <button type="submit" name="action" value="save_settings" class="btn primary">💾 บันทึกการตั้งค่าทั้งหมด</button>
+  </div>
+</form>
+
+<style>
+.settings-card {
+  background: #12172a;
+  border: 1px solid #2d3550;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.settings-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #e0e6f8;
+}
+.settings-sub-card {
+  background: #0e1320;
+  border: 1px solid #232a40;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+.settings-sub-title {
+  font-size: 0.97rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #c8d3f0;
+}
+.settings-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.settings-select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #1a1f2e;
+  color: #fff;
+  border: 1px solid #2d3550;
+}
+.yt-mode-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.yt-mode-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  background: #141926;
+  border: 1px solid #252e44;
+  transition: border-color 0.15s;
+}
+.yt-mode-opt:hover { border-color: #4a6fa5; }
+.yt-mode-opt input[type="radio"] { accent-color: #4a8df8; }
+.yt-mode-opt span { font-size: 0.91rem; color: #d0d8f0; }
+</style>
+{% endblock %}
