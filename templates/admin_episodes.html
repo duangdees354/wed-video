@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}จัดการตอน - {{ series['title'] }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{{ url_for('admin_series') }}">จัดการเรื่อง</a> /
+  <span>{{ series['title'] }}</span>
+</div>
+
+<h1 style="margin-bottom:1.25rem;">จัดการตอน: {{ series['title'] }}</h1>
+
+<!-- ═══ ฟอร์มเพิ่มตอนใหม่ ═══ -->
+<div class="admin-card">
+  <div class="admin-card-header">
+    <span class="admin-card-icon">➕</span>
+    <span class="admin-card-title">เพิ่มตอนใหม่</span>
+  </div>
+  <form method="post" class="ep-form" enctype="multipart/form-data">
+
+    <div class="ep-form-row">
+      <div class="ep-form-col-sm">
+        <label for="episode_number">เลขตอน</label>
+        <input type="number" id="episode_number" name="episode_number" min="1" placeholder="เช่น 1" />
+      </div>
+      <div class="ep-form-col-lg">
+        <label for="title">ชื่อตอน *</label>
+        <input type="text" id="title" name="title" required placeholder="ชื่อตอนนี้" />
+      </div>
+    </div>
+
+    <label for="description">คำอธิบายตอน</label>
+    <textarea id="description" name="description" rows="2" placeholder="คำอธิบายสั้นๆ (ไม่บังคับ)"></textarea>
+
+    <div class="ep-cover-row">
+      <div class="ep-cover-col">
+        <label for="thumbnail_url">ลิงก์รูปปกตอน (URL)</label>
+        <input type="url" id="thumbnail_url" name="thumbnail_url" placeholder="https://..." />
+      </div>
+      <div class="ep-cover-col">
+        <label for="cover_file">หรืออัปโหลดรูปปกจากเครื่อง</label>
+        <input type="file" id="cover_file" name="cover_file" accept="image/*" />
+      </div>
+    </div>
+
+    <hr class="ep-divider" />
+
+    <p class="ep-section-label">📺 เลือกแหล่งที่มาของวิดีโอ</p>
+
+    <div class="mode-selector">
+      <label class="mode-opt">
+        <input type="radio" name="mode" value="direct" checked />
+        <span class="mode-opt-content">
+          <span class="mode-opt-title">โหมด A — ลิงก์ URL</span>
+          <span class="mode-opt-desc">ลิงก์ .mp4 หรือ YouTube</span>
+        </span>
+      </label>
+      <label class="mode-opt">
+        <input type="radio" name="mode" value="gdrive" />
+        <span class="mode-opt-content">
+          <span class="mode-opt-title">โหมด B — Google Drive</span>
+          <span class="mode-opt-desc">ใช้ gdown ดาวน์โหลด</span>
+        </span>
+      </label>
+      <label class="mode-opt">
+        <input type="radio" name="mode" value="upload" />
+        <span class="mode-opt-content">
+          <span class="mode-opt-title">โหมด C — อัปโหลดไฟล์</span>
+          <span class="mode-opt-desc">อัปโหลด .mp4 จากเครื่อง</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="mode-block" id="mode-direct">
+      <label for="video_url">ลิงก์วิดีโอ (.mp4 หรือ YouTube) *</label>
+      <input type="text" id="video_url" name="video_url"
+             placeholder="https://youtu.be/xxxxx  หรือ  https://example.com/video.mp4" />
+      <p class="ep-hint">💡 วางลิงก์ YouTube ได้เลย — ระบบจะดาวน์โหลดมาเก็บไว้ให้อัตโนมัติ ไม่มี UI ของ YouTube</p>
+
+      <div class="yt-dl-options" id="yt-dl-options">
+        <p class="ep-section-label" style="margin-top:0.85rem;">🔧 ตัวเลือกการดาวน์โหลด YouTube</p>
+        <div class="yt-mode-group">
+          <label class="yt-mode-opt">
+            <input type="radio" name="yt_download_mode" value="none" checked />
+            <span>ไม่ใช้อะไรเลย</span>
+          </label>
+          <label class="yt-mode-opt">
+            <input type="radio" name="yt_download_mode" value="spoof" />
+            <span>ใช้การปลอมตัว (Spoof User-Agent)</span>
+          </label>
+          <label class="yt-mode-opt">
+            <input type="radio" name="yt_download_mode" value="cookies" />
+            <span>ใช้ Cookies <small style="color:#888;">(ตั้งค่า cookies ได้ที่ ตั้งค่าทั่วไป)</small></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-block" id="mode-gdrive" style="display:none;">
+      <label for="drive_link">ลิงก์หรือ File ID ของ Google Drive *</label>
+      <input type="text" id="drive_link" name="drive_link"
+             placeholder="https://drive.google.com/file/d/FILE_ID/view  หรือ  FILE_ID" />
+    </div>
+
+    <div class="mode-block" id="mode-upload" style="display:none;">
+      <label for="file">เลือกไฟล์วิดีโอ (.mp4) *</label>
+      <input type="file" id="file" name="file" accept="video/mp4" />
+    </div>
+
+    <button type="submit" class="btn primary ep-submit-btn">💾 บันทึกตอนใหม่</button>
+  </form>
+</div>
+
+<!-- ═══ รายการตอน ═══ -->
+<div style="margin-top:2rem;">
+  <h2 style="margin-bottom:0.75rem;">รายการตอนในเรื่องนี้</h2>
+
+  {% if episodes %}
+    <div class="ep-list">
+      {% for ep in episodes %}
+        {% set ep_status = ep['status'] if ep['status'] is not none else 'ready' %}
+        {% set is_active = ep['is_active']|default(1)|int %}
+        <div class="ep-card{% if is_active == 0 %} ep-card--inactive{% endif %}">
+
+          <div class="ep-card-top">
+            <div class="ep-card-thumb">
+              {% if ep['thumbnail_url'] %}
+                {% set ethumb = ep['thumbnail_url'] %}
+                <img src="{{ ethumb if ethumb.startswith('http') else media_url(ethumb) }}"
+                     alt="{{ ep['title'] }}" class="ep-thumb-img" />
+              {% else %}
+                <div class="ep-thumb-placeholder">ไม่มีปก</div>
+              {% endif %}
+            </div>
+
+            <div class="ep-card-info">
+              <div class="ep-card-title">
+                {% if ep['episode_number'] %}ตอนที่ {{ ep['episode_number'] }}: {% endif %}{{ ep['title'] }}
+              </div>
+              {% if ep['description'] %}
+                <div class="ep-card-desc">
+                  {{ ep['description'][:80] }}{% if ep['description']|length > 80 %}…{% endif %}
+                </div>
+              {% endif %}
+
+              {% if ep_status == 'processing' %}
+                <span class="ep-badge ep-badge--processing">
+                  ⏳ กำลังดาวน์โหลด{% if ep['source_type'] == 'youtube' %} จาก YouTube{% else %} จาก Drive{% endif %}…
+                </span>
+              {% elif ep_status == 'error' %}
+                <span class="ep-badge ep-badge--error">❌ โหลดวิดีโอล้มเหลว</span>
+              {% endif %}
+
+              {% if is_active == 0 %}
+                <span class="ep-badge ep-badge--hidden">🔒 ปิดการดู</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="ep-card-actions">
+            <a class="ep-btn ep-btn--watch"
+               href="{{ url_for('watch_episode', series_id=series['id'], episode_id=ep['id']) }}"
+               target="_blank">ดูตอน</a>
+
+            <a class="ep-btn ep-btn--edit"
+               href="{{ url_for('admin_edit_episode', episode_id=ep['id']) }}">แก้ไข</a>
+
+            <form method="post" action="{{ url_for('admin_toggle_episode', episode_id=ep['id']) }}"
+                  style="display:contents;">
+              <button type="submit" class="ep-btn ep-btn--toggle">
+                {% if is_active == 1 %}ปิดชั่วคราว{% else %}เปิดให้ดู{% endif %}
+              </button>
+            </form>
+
+            {% if ep_status == 'error' %}
+              <form method="post" action="{{ url_for('admin_retry_download', episode_id=ep['id']) }}"
+                    style="display:contents;">
+                <button type="submit" class="ep-btn ep-btn--retry">🔄 ลองใหม่</button>
+              </form>
+            {% endif %}
+
+            {% if ep['file_path'] and ep['source_type'] in ('gdrive', 'upload', 'youtube') %}
+              <a class="ep-btn ep-btn--dl-mp4"
+                 href="{{ url_for('admin_download_episode_mp4', episode_id=ep['id']) }}"
+                 download title="ดาวน์โหลด MP4 ลงเครื่อง">⬇ MP4</a>
+              <a class="ep-btn ep-btn--dl-mp3"
+                 href="{{ url_for('admin_download_episode_mp3', episode_id=ep['id']) }}"
+                 download title="ดาวน์โหลด MP3 (เสียงอย่างเดียว) ลงเครื่อง">⬇ MP3</a>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('admin_delete_episode', episode_id=ep['id']) }}"
+                  onsubmit="return confirm('ยืนยันการลบตอน ?');"
+                  style="display:contents;">
+              <button type="submit" class="ep-btn ep-btn--delete">ลบ</button>
+            </form>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="ep-empty">ยังไม่มีตอนในเรื่องนี้</div>
+  {% endif %}
+</div>
+
+<script>
+  const radios = document.querySelectorAll('input[name="mode"]');
+  const blockDirect = document.getElementById("mode-direct");
+  const blockGdrive = document.getElementById("mode-gdrive");
+  const blockUpload = document.getElementById("mode-upload");
+  const ytDlOptions = document.getElementById("yt-dl-options");
+  function updateMode() {
+    const v = document.querySelector('input[name="mode"]:checked').value;
+    blockDirect.style.display = v === "direct" ? "block" : "none";
+    blockGdrive.style.display = v === "gdrive" ? "block" : "none";
+    blockUpload.style.display = v === "upload" ? "block" : "none";
+    if (ytDlOptions) {
+      ytDlOptions.style.display = v === "direct" ? "block" : "none";
+    }
+  }
+  radios.forEach(r => r.addEventListener("change", updateMode));
+  updateMode();
+</script>
+{% endblock %}
