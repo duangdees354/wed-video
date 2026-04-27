@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}สำรองและคืนค่าข้อมูล{% endblock %}
+
+{% block content %}
+<h1>สำรองและคืนค่าข้อมูล</h1>
+
+<section class="backup-section">
+  <h2>ดาวน์โหลดค่าปัจจุบัน (สำรองข้อมูล)</h2>
+  <p class="hint">
+    เลือกดาวน์โหลดไฟล์สำรองตามหมวดหมู่ด้านล่าง แต่ละไฟล์จะเป็น <code>.json</code> แยกตามประเภทข้อมูล<br>
+    แนะนำให้ดาวน์โหลดเก็บไว้ทั้ง 3 แบบเป็นระยะ ๆ เพื่อความปลอดภัยของข้อมูล
+  </p>
+
+  <div class="backup-group">
+    <h3>1) ข้อมูลวิดีโอ (เรื่อง + ตอน)</h3>
+    <p class="hint">
+      รวมข้อมูลรายชื่อเรื่อง, ตอน, คำอธิบาย, ประเภทวิดีโอ, ลิงก์/ไอดีไฟล์ และข้อมูลวิดีโอที่ใช้เล่นทั้งหมด
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_videos') }}">ดาวน์โหลดข้อมูลวิดีโอ (.json)</a>
+  </div>
+
+  <div class="backup-group">
+    <h3>2) ข้อมูลสมาชิกและประวัติการดู</h3>
+    <p class="hint">
+      รวมข้อมูลบัญชีผู้ใช้ที่สมัครทั้งหมด, รหัสผ่าน (ตามที่บันทึกไว้ในระบบ), key ของผู้ใช้ และประวัติการดูของแต่ละคน
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_users') }}">ดาวน์โหลดข้อมูลสมาชิก (.json)</a>
+  </div>
+
+  <div class="backup-group">
+    <h3>3) การตั้งค่าระบบและข้อมูลอื่น ๆ</h3>
+    <p class="hint">
+      รวมการตั้งค่าทั้งหมดของระบบ เช่น ระยะเวลา Session, โหมดดาวน์โหลด YouTube, Cookies, และการตั้งค่าอื่น ๆ
+      ที่บันทึกไว้ใน <strong>ตั้งค่าทั่วไป</strong> — สามารถกู้คืนเพื่อให้ระบบกลับมาทำงานเหมือนเดิมได้ทันที
+    </p>
+    <a class="btn primary" href="{{ url_for('admin_backup_download_other') }}">ดาวน์โหลดการตั้งค่าระบบ (.json)</a>
+  </div>
+</section>
+
+<section class="restore-section">
+  <h2>คืนค่าจากไฟล์สำรอง</h2>
+  <p class="hint">
+    เลือกไฟล์สำรอง <code>.json</code> ที่เคยดาวน์โหลดจากระบบนี้ แล้วกด "คืนค่าจากไฟล์"<br>
+    ระบบจะตรวจสอบอัตโนมัติว่าเป็นไฟล์ประเภทใด
+    (<strong>วิดีโอ / สมาชิก / การตั้งค่า</strong>) และคืนค่าเฉพาะในหมวดหมู่นั้นเท่านั้น
+  </p>
+
+  <div class="restore-type-info">
+    <div class="rtype-item">
+      <span class="rtype-icon">🎬</span>
+      <div>
+        <strong>วิดีโอ</strong>
+        <p class="hint" style="margin:0;">คืนค่าข้อมูลเรื่องและตอนทั้งหมด</p>
+      </div>
+    </div>
+    <div class="rtype-item">
+      <span class="rtype-icon">👥</span>
+      <div>
+        <strong>สมาชิก</strong>
+        <p class="hint" style="margin:0;">คืนค่าบัญชีผู้ใช้และประวัติการดู</p>
+      </div>
+    </div>
+    <div class="rtype-item">
+      <span class="rtype-icon">⚙️</span>
+      <div>
+        <strong>การตั้งค่า</strong>
+        <p class="hint" style="margin:0;">คืนค่าการตั้งค่าระบบทั้งหมด (Session, YouTube, Cookies ฯลฯ)</p>
+      </div>
+    </div>
+  </div>
+
+  <form method="post" class="form" enctype="multipart/form-data" style="margin-top:1.2rem;">
+    <label for="backup_file">เลือกไฟล์สำรอง (.json)</label>
+    <input type="file" id="backup_file" name="backup_file" accept="application/json" required />
+
+    <fieldset class="restore-mode">
+      <legend>โหมดการคืนค่า</legend>
+      <label>
+        <input type="radio" name="restore_mode" value="replace" checked>
+        ลบข้อมูลเดิมในหมวดนั้นทั้งหมด แล้วใช้ข้อมูลจากไฟล์แทน
+      </label>
+      <label>
+        <input type="radio" name="restore_mode" value="merge">
+        รวม/อัปเดตข้อมูลจากไฟล์ โดยไม่ลบข้อมูลเดิม (ถ้ามี id ซ้ำ ระบบจะอัปเดตข้อมูลเดิมให้)
+      </label>
+    </fieldset>
+
+    <button type="submit" class="btn danger">คืนค่าจากไฟล์</button>
+  </form>
+</section>
+
+<style>
+.restore-type-info {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0.5rem;
+}
+.rtype-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #0e1320;
+  border: 1px solid #232a40;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  flex: 1;
+  min-width: 180px;
+}
+.rtype-icon { font-size: 1.4rem; line-height: 1; }
+</style>
+{% endblock %}
