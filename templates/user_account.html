@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}บัญชีของฉัน{% endblock %}
+
+{% block content %}
+<h1>บัญชีของฉัน</h1>
+
+<p style="margin-bottom:0.75rem;">ชื่อผู้ใช้ปัจจุบัน: <strong>{{ user['username'] }}</strong></p>
+
+<section style="margin-bottom:1.5rem;">
+  <h2 style="margin-bottom:0.5rem;">เปลี่ยนรหัสผ่าน</h2>
+  <form method="post" class="form">
+    <input type="hidden" name="action" value="change_password" />
+    <label for="current_password">รหัสผ่านเดิม</label>
+    <input type="password" id="current_password" name="current_password" required />
+
+    <label for="new_password">รหัสผ่านใหม่</label>
+    <input type="password" id="new_password" name="new_password" required />
+
+    <label for="confirm_password">ยืนยันรหัสผ่านใหม่</label>
+    <input type="password" id="confirm_password" name="confirm_password" required />
+
+    <button type="submit" class="btn primary">บันทึกการเปลี่ยนรหัสผ่าน</button>
+  </form>
+</section>
+
+<section>
+  <h2 style="margin-bottom:0.5rem;">Key ของบัญชี</h2>
+  <p class="hint">
+    ใช้ key นี้เพื่อให้แอดมินค้นหาบัญชีของคุณได้ง่ายขึ้น
+  </p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.75rem;">
+    <input
+      type="text"
+      id="account-key"
+      value="{{ user['user_key'] or '' }}"
+      readonly
+      style="flex:1;min-width:160px;"
+    />
+    <button type="button" class="btn" onclick="copyAccountKey()">คัดลอก key</button>
+  </div>
+
+  <form method="post" onsubmit="return confirm('ยืนยันการรีเซ็ต key ใหม่?');">
+    <input type="hidden" name="action" value="reset_key" />
+    <button type="submit" class="btn danger">รีเซ็ต key ใหม่</button>
+  </form>
+</section>
+
+<script>
+  function copyAccountKey() {
+    var input = document.getElementById("account-key");
+    if (!input) return;
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try {
+      var ok = document.execCommand("copy");
+      if (ok) {
+        alert("คัดลอก key แล้ว");
+      } else {
+        alert("ไม่สามารถคัดลอก key ได้ กรุณาคัดลอกเอง");
+      }
+    } catch (e) {
+      alert("ไม่สามารถคัดลอก key ได้ กรุณาคัดลอกเอง");
+    }
+  }
+</script>
+{% endblock %}

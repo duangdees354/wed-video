@@ -1,0 +1,82 @@
+
+{% extends "base.html" %}
+{% block title %}จัดการเรื่องทั้งหมด{% endblock %}
+
+{% block content %}
+<h1>จัดการเรื่องทั้งหมด</h1>
+
+<h2>เพิ่มเรื่องใหม่</h2>
+<form method="post" class="form" enctype="multipart/form-data">
+  <label for="title">ชื่อเรื่อง *</label>
+  <input type="text" id="title" name="title" required />
+
+  <label for="description">คำอธิบาย</label>
+  <textarea id="description" name="description" rows="3"></textarea>
+
+  <label for="thumbnail_url">ลิงก์รูปปก (ถ้ามีจากเน็ต)</label>
+  <input type="url" id="thumbnail_url" name="thumbnail_url" />
+
+  <label for="cover_file">หรืออัปโหลดรูปปกจากมือถือ</label>
+  <input type="file" id="cover_file" name="cover_file" accept="image/*" />
+
+  <p class="hint">
+    ถ้าใส่ทั้ง "ลิงก์รูปปก" และ "อัปโหลดรูป" ระบบจะใช้ "รูปที่อัปโหลด" เป็นหลัก
+  </p>
+
+  <button type="submit" class="btn primary">บันทึกเรื่องใหม่</button>
+</form>
+
+<h2 style="margin-top:2rem;">รายการเรื่องในระบบ</h2>
+
+<form method="get" class="search-form">
+  <input
+    type="text"
+    name="q"
+    class="search-input"
+    placeholder="ค้นหาเรื่องในระบบ เช่น นาจา ซีซั่น2"
+    value="{{ request.args.get('q', '') }}"
+  />
+  <button type="submit" class="btn search-btn">ค้นหา</button>
+  {% if request.args.get('q') %}
+    <a href="{{ url_for('admin_series') }}" class="btn secondary">ล้างค้นหา</a>
+  {% endif %}
+</form>
+
+{% if query %}
+  <p class="subtitle">ผลการค้นหาสำหรับ: "{{ query }}"</p>
+{% endif %}
+
+{% if series_list %}
+  <ul class="series-admin-list">
+    {% for s in series_list %}
+      <li class="series-admin-item">
+        <div class="series-admin-main">
+          <div class="series-admin-title">{{ s['title'] }}</div>
+          {% if s['description'] %}
+            <div class="series-admin-desc">
+              {{ s['description'][:120] }}{% if s['description']|length > 120 %}...{% endif %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="series-admin-actions">
+          <a class="btn" href="{{ url_for('admin_episodes', series_id=s['id']) }}">จัดการตอน</a>
+          <a class="btn" href="{{ url_for('admin_edit_series', series_id=s['id']) }}">แก้ไขเรื่อง</a>
+          <form method="post" action="{{ url_for('admin_delete_series', series_id=s['id']) }}" onsubmit="return confirm('ยืนยันการลบเรื่องนี้และตอนทั้งหมด?');">
+            <button type="submit" class="btn danger">ลบเรื่อง</button>
+          </form>
+
+          <form method="post" action="{{ url_for('admin_toggle_series', series_id=s['id']) }}" style="display:inline-block; margin-left:0.5rem;">
+            {% if s['is_active']|default(1)|int == 1 %}
+              <button type="submit" class="btn secondary">ปิดการดูชั่วคราว</button>
+            {% else %}
+              <button type="submit" class="btn secondary">เปิดให้ดู</button>
+            {% endif %}
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>ยังไม่มีเรื่องในระบบ</p>
+{% endif %}
+{% endblock %}

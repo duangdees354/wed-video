@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}จัดการผู้ใช้: {{ user['username'] }}{% endblock %}
+
+{% block content %}
+<h1>จัดการผู้ใช้</h1>
+
+<section style="margin-bottom:1.5rem;">
+  <h2 style="margin-bottom:0.5rem;">ข้อมูลบัญชี</h2>
+  <p><strong>ID:</strong> {{ user['id'] }}</p>
+  <p><strong>ชื่อผู้ใช้ปัจจุบัน:</strong> {{ user['username'] }}</p>
+  <p><strong>Key ปัจจุบัน:</strong> {{ user['user_key'] or '-' }}</p>
+  <p><strong>รหัสผ่าน (ตัวอักษรเดิม):</strong>
+    {% if user['plain_password'] %}
+      <code>{{ user['plain_password'] }}</code>
+    {% else %}
+      <em>ไม่มีข้อมูลรหัสผ่านเดิม (สมัครก่อนอัปเดตระบบ)</em>
+    {% endif %}
+  </p>
+  <p><strong>สมัครเมื่อ:</strong> {{ user['created_at']|thdt }}</p>
+
+  <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+    <a href="{{ url_for('admin_user_password_history', user_id=user['id']) }}" class="btn">
+      🔑 ดูประวัติการเปลี่ยนรหัสผ่าน
+    </a>
+    <a href="{{ url_for('admin_user_watch_history', user_id=user['id']) }}" class="btn">
+      📺 ดูประวัติการดูทั้งหมด
+    </a>
+  </div>
+</section>
+
+<section style="margin-bottom:1.5rem;">
+  <h2 style="margin-bottom:0.5rem;">แก้ไขชื่อผู้ใช้ / รหัสผ่าน</h2>
+  <form method="post" class="form">
+    <input type="hidden" name="action" value="update_account" />
+    <label for="username">ชื่อผู้ใช้ใหม่</label>
+    <input type="text" id="username" name="username" value="{{ user['username'] }}" required />
+
+    <label for="password">รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)</label>
+    <input type="text" id="password" name="password" />
+
+    <button type="submit" class="btn primary">บันทึกการเปลี่ยนแปลง</button>
+  </form>
+</section>
+
+<section style="margin-bottom:1.5rem;">
+  <h2 style="margin-bottom:0.5rem;">จัดการ Key</h2>
+  <form method="post" style="display:inline;" onsubmit="return confirm('ยืนยันการรีเซ็ต key ของผู้ใช้นี้?');">
+    <input type="hidden" name="action" value="reset_key" />
+    <button type="submit" class="btn">รีเซ็ต key</button>
+  </form>
+</section>
+
+<section style="margin-bottom:1.5rem;">
+  <h2 style="margin-bottom:0.5rem;">ลบบัญชี</h2>
+  <form method="post" onsubmit="return confirm('ยืนยันการลบบัญชีผู้ใช้นี้? ข้อมูลประวัติการดูทั้งหมดจะถูกลบด้วย');">
+    <input type="hidden" name="action" value="delete_user" />
+    <button type="submit" class="btn danger">ลบบัญชีนี้</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}ตั้งค่าทั่วไป{% endblock %}
+
+{% block content %}
+<h1>ตั้งค่าทั่วไป</h1>
+
+<form method="post" class="form">
+
+  <section style="margin-bottom:2rem;">
+    <h2 style="margin-bottom:0.75rem;">⏱ ระยะเวลา Session ผู้ใช้ทั่วไป</h2>
+    <p style="color:#aaa;margin-bottom:1rem;font-size:0.9rem;">
+      ผู้ใช้ทั่วไปจะถูกเตะออกจากระบบอัตโนมัติหลังจากไม่มีการล็อกอินใหม่เกินระยะเวลาที่กำหนด<br>
+      ค่าเริ่มต้น: <strong style="color:#fff;">30 วัน</strong>
+    </p>
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <input
+        type="number"
+        name="user_timeout_number"
+        value="{{ settings.user_timeout_number }}"
+        min="1"
+        style="width:120px;"
+        required
+      />
+      <select name="user_timeout_unit" style="padding:0.5rem 0.75rem;border-radius:6px;background:#1a1f2e;color:#fff;border:1px solid #2d3550;">
+        <option value="minutes" {% if settings.user_timeout_unit == 'minutes' %}selected{% endif %}>นาที</option>
+        <option value="hours"   {% if settings.user_timeout_unit == 'hours'   %}selected{% endif %}>ชั่วโมง</option>
+        <option value="days"    {% if settings.user_timeout_unit == 'days'    %}selected{% endif %}>วัน</option>
+      </select>
+    </div>
+    <p style="color:#888;font-size:0.82rem;margin-top:0.5rem;">
+      ตัวอย่าง: 30 วัน = ผู้ใช้ไม่ต้องล็อกอินใหม่นาน 1 เดือน
+    </p>
+  </section>
+
+  <section style="margin-bottom:2rem;">
+    <h2 style="margin-bottom:0.75rem;">🔐 ระยะเวลา Session แอดมิน</h2>
+    <p style="color:#aaa;margin-bottom:1rem;font-size:0.9rem;">
+      บัญชีแอดมินจะถูกเตะออกจากหลังบ้านอัตโนมัติหลังจากล็อกอินเกินระยะเวลาที่กำหนด<br>
+      ค่าเริ่มต้น: <strong style="color:#fff;">8 ชั่วโมง</strong>
+    </p>
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <input
+        type="number"
+        name="admin_timeout_number"
+        value="{{ settings.admin_timeout_number }}"
+        min="1"
+        style="width:120px;"
+        required
+      />
+      <select name="admin_timeout_unit" style="padding:0.5rem 0.75rem;border-radius:6px;background:#1a1f2e;color:#fff;border:1px solid #2d3550;">
+        <option value="minutes" {% if settings.admin_timeout_unit == 'minutes' %}selected{% endif %}>นาที</option>
+        <option value="hours"   {% if settings.admin_timeout_unit == 'hours'   %}selected{% endif %}>ชั่วโมง</option>
+        <option value="days"    {% if settings.admin_timeout_unit == 'days'    %}selected{% endif %}>วัน</option>
+      </select>
+    </div>
+    <p style="color:#888;font-size:0.82rem;margin-top:0.5rem;">
+      ตัวอย่าง: 8 ชั่วโมง = แอดมินถูกเตะออกหลังจาก 8 ชั่วโมงนับจากที่ล็อกอิน
+    </p>
+  </section>
+
+  <button type="submit" class="btn primary">บันทึกการตั้งค่า</button>
+</form>
+{% endblock %}
